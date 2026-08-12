@@ -1,6 +1,14 @@
 import React from 'react';
 import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from 'remotion';
-import type { MechanismSpec, SceneObject, SceneRelationship } from './scene';
+import type {
+  ComparisonConfig,
+  FlowConfig,
+  MechanismSpec,
+  ProgressionConfig,
+  SceneObject,
+  SceneRelationship,
+  SequenceConfig,
+} from './scene';
 
 const center = (object: SceneObject) => ({
   x: object.x + (object.width ?? 120) / 2,
@@ -14,6 +22,53 @@ const arrow = (x1: number, y1: number, x2: number, y2: number, color: string) =>
   const right = `${x2 - size * Math.cos(angle + Math.PI / 6)},${y2 - size * Math.sin(angle + Math.PI / 6)}`;
   return <polygon points={`${x2},${y2} ${left} ${right}`} fill={color} />;
 };
+
+const pathPoints = (relationship: SceneRelationship, objects: Map<string, SceneObject>) => {
+  if (relationship.path?.points && relationship.path.points.length >= 2) return relationship.path.points;
+  const from = objects.get(relationship.from);
+  const to = objects.get(relationship.to);
+  if (!from || !to) return [];
+  return [center(from), center(to)];
+};
+
+const polylineLength = (points: { x: number; y: number }[]) => points.slice(1).reduce((sum, point, index) => {
+  const previous = points[index];
+  return sum + Math.hypot(point.x - previous.x, point.y - previous.y);
+}, 0);
+
+const pointAlongPolyline = (points: { x: number; y: number }[], progress: number) => {
+  if (points.length === 0) return { x: 0, y: 0 };
+  if (points.length === 1) return points[0];
+  const total = polylineLength(points);
+  if (!total) return points[0];
+  let distance = Math.min(1, Math.max(0, progress)) * total;
+  for (let index = 1; index < points.length; index += 1) {
+    const a = points[index - 1];
+    const b = points[index];
+    const segment = Math.hypot(b.x - a.x, b.y - a.y);
+    if (distance <= segment) {
+      const t = segment === 0 ? 0 : distance / segment;
+      return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
+    }
+    distance -= segment;
+  }
+  return points[points.length - 1];
+};
+
+const anchorPosition = (object: SceneObject, anchor: ComparisonConfig['anchor'], gap: number) => {
+  const width = object.width ?? 120;
+  const height = object.height ?? 80;
+  const c = center(object);
+  switch (anchor) {
+    case 'top': return { x: c.x, y: object.y - gap };
+    case 'left': return { x: object.x - gap, y: c.y };
+    case 'right': return { x: object.x + width + gap, y: c.y };
+    case 'bottom':
+    default: return { x: c.x, y: object.y + height + gap };
+  }
+};
+
+const sequenceGeometry = (targets: SceneObject[]) => targets.map((target) => center(target));
 
 export const MechanismOverlay: React.FC<{
   mechanisms: MechanismSpec[];
@@ -49,21 +104,17 @@ export const MechanismOverlay: React.FC<{
 
           if (mechanism.type === 'flow' || mechanism.type === 'cause-effect' || mechanism.type === 'interaction') {
             return relations.map((relationship) => {
-              const from = byId.get(relationship.from);
-              const to = byId.get(relationship.to);
-              if (!from || !to) return null;
-              const a = center(from);
-              const b = center(to);
-              const progress = (frame % Math.max(1, Math.round(fps * 1.6))) / Math.max(1, fps * 1.6);
-              const px = interpolate(progress, [0, 1], [a.x, b.x]);
-              const py = interpolate(progress, [0, 1], [a.y, b.y]);
+              const points = pathPoints(relationship, byId);
+              if (points.length < 2) return null;
+              const progress = (frame % Math.max(1, Math.round(fps * Number((config as FlowConfig).cycleSeconds ?? 1.6)))) / Math.max(1, fps * Number((config as FlowConfig).cycleSeconds ?? 1.6));
+              const particle = pointAlongPolyline(points, relationship.direction === 'backward' ? 1 - progress : progress);
               const stroke = relationship.style?.stroke ?? accent;
               return (
                 <g key={`${mechanism.id}-${relationship.id}`}>
-                  <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={stroke} strokeWidth={mechanism.type === 'interaction' ? 4 : 5} strokeDasharray={mechanism.type === 'flow' ? '18 16' : undefined} opacity={0.8} />
-                  {arrow(a.x, a.y, b.x, b.y, stroke)}
-                  {mechanism.type === 'flow' && <circle cx={px} cy={py} r={10} fill={accent} filter="url(#universalGlow)" />}
-                  {relationship.label && <text x={(a.x + b.x) / 2} y={(a.y + b.y) / 2 - 16} fill="#b9d1db" fontSize={20} textAnchor="middle">{relationship.label}</text>}
+                  <polyline points={points.map((point) => `${point.x},${point.y}`).join(' ')} fill="none" stroke={stroke} strokeWidth={mechanism.type === 'interaction' ? 4 : 5} strokeDasharray={mechanism.type === 'flow' ? '18 16' : undefined} opacity={0.8} />
+                  {arrow(points[points.length - 2].x, points[points.length - 2].y, points[points.length - 1].x, points[points.length - 1].y, stroke)}
+                  {mechanism.type === 'flow' && <circle cx={particle.x} cy={particle.y} r={Number((config as FlowConfig).particleRadius ?? 10)} fill={accent} filter="url(#universalGlow)" />}
+                  {relationship.label && <text x={particle.x} y={particle.y - 18} fill="#b9d1db" fontSize={20} textAnchor="middle">{relationship.label}</text>}
                 </g>
               );
             });
@@ -86,34 +137,83 @@ export const MechanismOverlay: React.FC<{
           }
 
           if (mechanism.type === 'comparison') {
-            const left = Number(config.leftValue ?? 1);
-            const right = Number(config.rightValue ?? 1);
-            const max = Math.max(1, left, right);
-            const baseY = Number(config.baseY ?? 820);
-            const scale = Number(config.scale ?? 180);
+            if (targets.length < 2) return null;
+            const comparison = config as ComparisonConfig;
+            const anchor = comparison.anchor ?? 'bottom';
+            const gap = Number(comparison.gap ?? 48);
+            const barWidth = Number(comparison.barWidth ?? 120);
+            const maxBarExtent = Number(comparison.maxBarExtent ?? 220);
+            const values = comparison.values ?? {};
+            const getValue = (target: SceneObject) => comparison.valueMode === 'config' ? Number(values[target.id] ?? 0) : Number(target.quantity ?? values[target.id] ?? 0);
+            const valueA = getValue(targets[0]);
+            const valueB = getValue(targets[1]);
+            const maxValue = Math.max(1, valueA, valueB);
+            const baseA = anchorPosition(targets[0], anchor, gap);
+            const baseB = anchorPosition(targets[1], anchor, gap);
+            const vertical = anchor === 'top' || anchor === 'bottom';
+            const extentA = (valueA / maxValue) * maxBarExtent;
+            const extentB = (valueB / maxValue) * maxBarExtent;
+            const colorA = String(comparison.leftColor ?? '#5c8cff');
+            const colorB = String(comparison.rightColor ?? '#ff8f5c');
             return (
               <g key={mechanism.id}>
-                <rect x={600} y={baseY - (left / max) * scale} width={180} height={(left / max) * scale} rx={12} fill={String(config.leftColor ?? '#5c8cff')} opacity={0.8} />
-                <rect x={1040} y={baseY - (right / max) * scale} width={180} height={(right / max) * scale} rx={12} fill={String(config.rightColor ?? '#ff8f5c')} opacity={0.8} />
-                <text x={690} y={baseY + 34} fill="#d8e5ea" fontSize={22} textAnchor="middle">{String(config.leftLabel ?? 'A')}</text>
-                <text x={1130} y={baseY + 34} fill="#d8e5ea" fontSize={22} textAnchor="middle">{String(config.rightLabel ?? 'B')}</text>
+                {vertical ? (
+                  <>
+                    <rect x={baseA.x - barWidth / 2} y={anchor === 'bottom' ? baseA.y : baseA.y - extentA} width={barWidth} height={extentA} rx={12} fill={colorA} opacity={0.8} />
+                    <rect x={baseB.x - barWidth / 2} y={anchor === 'bottom' ? baseB.y : baseB.y - extentB} width={barWidth} height={extentB} rx={12} fill={colorB} opacity={0.8} />
+                  </>
+                ) : (
+                  <>
+                    <rect x={anchor === 'right' ? baseA.x : baseA.x - extentA} y={baseA.y - barWidth / 2} width={extentA} height={barWidth} rx={12} fill={colorA} opacity={0.8} />
+                    <rect x={anchor === 'right' ? baseB.x : baseB.x - extentB} y={baseB.y - barWidth / 2} width={extentB} height={barWidth} rx={12} fill={colorB} opacity={0.8} />
+                  </>
+                )}
+                <text x={vertical ? baseA.x : baseA.x + (anchor === 'right' ? 20 : -20)} y={vertical ? baseA.y + (anchor === 'bottom' ? 30 : -16) : baseA.y + 8} fill="#d8e5ea" fontSize={22} textAnchor={vertical ? 'middle' : anchor === 'right' ? 'start' : 'end'}>{String(comparison.leftLabel ?? targets[0].state ?? targets[0].id)} {comparison.labelSuffix ?? ''}</text>
+                <text x={vertical ? baseB.x : baseB.x + (anchor === 'right' ? 20 : -20)} y={vertical ? baseB.y + (anchor === 'bottom' ? 30 : -16) : baseB.y + 8} fill="#d8e5ea" fontSize={22} textAnchor={vertical ? 'middle' : anchor === 'right' ? 'start' : 'end'}>{String(comparison.rightLabel ?? targets[1].state ?? targets[1].id)} {comparison.labelSuffix ?? ''}</text>
               </g>
             );
           }
 
           if (mechanism.type === 'sequence' || mechanism.type === 'progression') {
-            const count = Math.max(1, Number(config.count ?? targets.length ?? 4));
-            const active = Math.floor((frame / Math.max(1, fps * Number(config.stepSeconds ?? 1))) % count);
-            const startX = Number(config.startX ?? 660);
-            const y = Number(config.y ?? 880);
+            if (targets.length === 0) return null;
+            const sequence = config as SequenceConfig;
+            const progression = config as ProgressionConfig;
+            const stepSeconds = Math.max(0.1, Number(sequence.stepSeconds ?? 1));
+            const cycle = Math.max(1, fps * stepSeconds * targets.length);
+            const continuous = (frame % cycle) / Math.max(1, fps * stepSeconds);
+            const activeIndex = Math.min(targets.length - 1, Math.floor(continuous));
+            const blend = Math.min(1, Math.max(0, continuous - activeIndex));
+            const points = sequenceGeometry(targets);
+            const activeColor = String(sequence.color ?? accent);
+            const inactiveColor = String(sequence.inactiveColor ?? '#4a626c');
+            const connectorColor = String(sequence.connectorColor ?? '#4a626c');
             return (
               <g key={mechanism.id}>
-                {Array.from({ length: count }, (_, index) => (
-                  <g key={index}>
-                    <circle cx={startX + index * 110} cy={y} r={index === active ? 18 : 10} fill={index === active ? accent : '#4a626c'} opacity={index === active ? 1 : 0.7} />
-                    {index < count - 1 && <line x1={startX + index * 110 + 16} y1={y} x2={startX + index * 110 + 94} y2={y} stroke="#4a626c" strokeWidth={3} />}
-                  </g>
-                ))}
+                <polyline points={points.map((point) => `${point.x},${point.y}`).join(' ')} fill="none" stroke={connectorColor} strokeWidth={3} opacity={0.7} />
+                {targets.map((target, index) => {
+                  const point = points[index];
+                  const isActive = index === activeIndex;
+                  const isPast = index < activeIndex;
+                  const scale = mechanism.type === 'progression' ? 1 + ((isActive ? 1 - blend : isPast ? 0.16 : 0) * Number(progression.completionScale ?? 0.18)) : 1;
+                  const radius = 24 * scale;
+                  const stateText = target.state ?? target.text ?? target.id;
+                  return (
+                    <g key={`${mechanism.id}-${target.id}`}>
+                      <circle cx={point.x} cy={point.y} r={radius} fill={isActive ? activeColor : inactiveColor} opacity={isActive || isPast ? 1 : 0.6} />
+                      {index < targets.length - 1 && <line x1={point.x + radius + 8} y1={point.y} x2={points[index + 1].x - radius - 8} y2={points[index + 1].y} stroke={connectorColor} strokeWidth={3} opacity={0.7} />}
+                      {(isActive || isPast) && sequence.showStateLabel !== false && <text x={point.x} y={point.y - radius - 18} fill="#d8e5ea" fontSize={18} textAnchor="middle">{stateText}</text>}
+                    </g>
+                  );
+                })}
+                {mechanism.type === 'progression' && points[activeIndex + 1] && (
+                  <circle
+                    cx={interpolate(blend, [0, 1], [points[activeIndex].x, points[activeIndex + 1].x])}
+                    cy={interpolate(blend, [0, 1], [points[activeIndex].y, points[activeIndex + 1].y])}
+                    r={8}
+                    fill={activeColor}
+                    filter="url(#universalGlow)"
+                  />
+                )}
               </g>
             );
           }

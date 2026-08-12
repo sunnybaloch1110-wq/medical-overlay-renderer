@@ -16,6 +16,10 @@ export type MechanismType =
   | 'layers';
 
 export type Point = { x: number; y: number };
+export type RelationshipPath = {
+  kind: 'polyline';
+  points: Point[];
+};
 export type SceneStyle = {
   fill?: string;
   stroke?: string;
@@ -56,7 +60,41 @@ export type SceneRelationship = {
   to: string;
   label?: string;
   direction?: 'forward' | 'backward' | 'bidirectional';
+  path?: RelationshipPath;
   style?: SceneStyle;
+};
+
+export type FlowConfig = {
+  color?: string;
+  particleRadius?: number;
+  cycleSeconds?: number;
+};
+
+export type ComparisonConfig = {
+  valueMode?: 'quantity' | 'config';
+  values?: Record<string, number>;
+  anchor?: 'top' | 'bottom' | 'left' | 'right';
+  gap?: number;
+  barWidth?: number;
+  maxBarExtent?: number;
+  color?: string;
+  leftColor?: string;
+  rightColor?: string;
+  leftLabel?: string;
+  rightLabel?: string;
+  labelSuffix?: string;
+};
+
+export type SequenceConfig = {
+  stepSeconds?: number;
+  color?: string;
+  inactiveColor?: string;
+  connectorColor?: string;
+  showStateLabel?: boolean;
+};
+
+export type ProgressionConfig = SequenceConfig & {
+  completionScale?: number;
 };
 
 export type MechanismSpec = {

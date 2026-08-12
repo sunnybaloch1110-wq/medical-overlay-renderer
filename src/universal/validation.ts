@@ -21,6 +21,17 @@ export function validateScene(scene: SceneSpec): SceneSpec {
   for (const relationship of relationships) {
     if (!ids.has(relationship.from)) fail(`${scene.id}: relationship '${relationship.id}' references missing '${relationship.from}'`);
     if (!ids.has(relationship.to)) fail(`${scene.id}: relationship '${relationship.id}' references missing '${relationship.to}'`);
+    if (relationship.path && relationship.path.points.length < 2) fail(`${scene.id}: relationship '${relationship.id}' path requires at least 2 points`);
+  }
+
+  const relationshipIds = new Set(relationships.map((relationship) => relationship.id));
+  for (const mechanism of scene.mechanisms ?? []) {
+    for (const targetId of mechanism.targetIds ?? []) {
+      if (!ids.has(targetId)) fail(`${scene.id}: mechanism '${mechanism.id}' references missing object '${targetId}'`);
+    }
+    for (const relationshipId of mechanism.relationshipIds ?? []) {
+      if (!relationshipIds.has(relationshipId)) fail(`${scene.id}: mechanism '${mechanism.id}' references missing relationship '${relationshipId}'`);
+    }
   }
 
   return scene;

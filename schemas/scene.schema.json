@@ -30,17 +30,7 @@
           "state": { "type": "string" },
           "quantity": { "type": "number" },
           "style": { "type": "object", "additionalProperties": true },
-          "motion": {
-            "type": "object",
-            "required": ["from", "to", "durationSeconds"],
-            "properties": {
-              "from": { "$ref": "#/$defs/point" },
-              "to": { "$ref": "#/$defs/point" },
-              "startSeconds": { "type": "number", "minimum": 0 },
-              "durationSeconds": { "type": "number", "exclusiveMinimum": 0 }
-            },
-            "additionalProperties": false
-          }
+          "motion": { "type": "object", "additionalProperties": true }
         },
         "additionalProperties": true
       }
@@ -56,6 +46,19 @@
           "to": { "type": "string" },
           "label": { "type": "string" },
           "direction": { "enum": ["forward", "backward", "bidirectional"] },
+          "path": {
+            "type": "object",
+            "required": ["kind", "points"],
+            "properties": {
+              "kind": { "const": "polyline" },
+              "points": {
+                "type": "array",
+                "minItems": 2,
+                "items": { "$ref": "#/$defs/point" }
+              }
+            },
+            "additionalProperties": false
+          },
           "style": { "type": "object", "additionalProperties": true }
         },
         "additionalProperties": true
