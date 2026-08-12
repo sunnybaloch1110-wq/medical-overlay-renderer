@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "videoId": "universal-mechanisms-test",
+  "scenes": [
+    {
+      "schemaVersion": 1,
+      "id": "scene_001",
+      "sourceConcept": "Directional movement along a branched pathway",
+      "durationSeconds": 6,
+      "fps": 30,
+      "title": "Complex pathway",
+      "background": "#071018",
+      "objects": [
+        {"id":"node_a","shape":"circle","x":220,"y":470,"radius":34,"style":{"fill":"#294f63","stroke":"#72d6ff","strokeWidth":3}},
+        {"id":"node_b","shape":"circle","x":520,"y":300,"radius":30,"style":{"fill":"#294f63","stroke":"#72d6ff","strokeWidth":3}},
+        {"id":"node_c","shape":"circle","x":820,"y":470,"radius":28,"style":{"fill":"#294f63","stroke":"#72d6ff","strokeWidth":3}},
+        {"id":"node_d","shape":"circle","x":1120,"y":320,"radius":32,"style":{"fill":"#294f63","stroke":"#72d6ff","strokeWidth":3}},
+        {"id":"node_e","shape":"circle","x":1460,"y":520,"radius":34,"style":{"fill":"#294f63","stroke":"#72d6ff","strokeWidth":3}},
+        {"id":"node_f","shape":"text","x":176,"y":590,"text":"Start","style":{"color":"#b9d1db","fontSize":22}},
+        {"id":"node_g","shape":"text","x":1400,"y":620,"text":"Destination","style":{"color":"#b9d1db","fontSize":22}}
+      ],
+      "relationships": [
+        {"id":"path_main","from":"node_a","to":"node_e","direction":"forward","path":{"kind":"polyline","points":[{"x":220,"y":470},{"x":390,"y":220},{"x":700,"y":260},{"x":980,"y":620},{"x":1230,"y":400},{"x":1460,"y":520}]},"style":{"stroke":"#72d6ff"},"label":"path"}
+      ],
+      "mechanisms": [
+        {"id":"m_flow","type":"flow","relationshipIds":["path_main"],"config":{"cycleSeconds":2.2,"particleRadius":12,"color":"#72d6ff"}},
+        {"id":"m_move","type":"movement","targetIds":["node_e"],"config":{"color":"#ffcf5c"}}
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "scene_002",
+      "sourceConcept": "Quantitative comparison of independently positioned entities",
+      "durationSeconds": 5,
+      "fps": 30,
+      "title": "Object-anchored comparison",
+      "background": "#08141d",
+      "objects": [
+        {"id":"item_left","shape":"rect","x":260,"y":300,"width":260,"height":140,"quantity":80,"state":"A","style":{"fill":"#223f52","stroke":"#5c8cff","strokeWidth":3,"rx":18}},
+        {"id":"item_mid","shape":"ellipse","x":820,"y":520,"width":240,"height":150,"quantity":50,"state":"B","style":{"fill":"#3a2f24","stroke":"#ff9b62","strokeWidth":3}},
+        {"id":"item_right","shape":"circle","x":1390,"y":330,"radius":72,"quantity":110,"state":"C","style":{"fill":"#214c3f","stroke":"#76d6a2","strokeWidth":3}},
+        {"id":"measure_a","shape":"line","x":530,"y":720,"width":420,"height":0,"style":{"stroke":"#89d6ff","strokeWidth":2}}
+      ],
+      "mechanisms": [
+        {"id":"m_compare","type":"comparison","targetIds":["item_left","item_mid"],"config":{"valueMode":"object","anchor":"bottom","gap":36,"barWidth":72,"maxBarExtent":180,"leftLabel":"A","rightLabel":"B","leftColor":"#5c8cff","rightColor":"#ff9b62","labelSuffix":" units"}},
+        {"id":"m_measure","type":"measurement","targetIds":["item_mid","item_right"],"config":{"label":"relative span","color":"#76d6a2"}}
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "scene_003",
+      "sourceConcept": "Progression through ordered states positioned as a spatial path",
+      "durationSeconds": 8,
+      "fps": 30,
+      "title": "Entity-based progression",
+      "background": "#071018",
+      "objects": [
+        {"id":"state_1","shape":"rect","x":240,"y":700,"width":220,"height":110,"state":"State 1","style":{"fill":"#1c3440","stroke":"#72d6ff","strokeWidth":3,"rx":18}},
+        {"id":"state_2","shape":"rect","x":620,"y":300,"width":220,"height":110,"state":"State 2","style":{"fill":"#243c33","stroke":"#76d6a2","strokeWidth":3,"rx":18}},
+        {"id":"state_3","shape":"rect","x":1010,"y":650,"width":220,"height":110,"state":"State 3","style":{"fill":"#3d3122","stroke":"#ffcf5c","strokeWidth":3,"rx":18}},
+        {"id":"state_4","shape":"rect","x":1430,"y":250,"width":220,"height":110,"state":"State 4","style":{"fill":"#3a2631","stroke":"#ff7f9a","strokeWidth":3,"rx":18}}
+      ],
+      "mechanisms": [
+        {"id":"m_sequence","type":"sequence","targetIds":["state_1","state_2","state_3","state_4"],"config":{"stepSeconds":1.4,"color":"#72d6ff","inactiveColor":"#4a626c","connectorColor":"#4a626c"}},
+        {"id":"m_progress","type":"progression","targetIds":["state_1","state_2","state_3","state_4"],"config":{"stepSeconds":1.4,"color":"#ffcf5c","inactiveColor":"#4a626c","connectorColor":"#4a626c"}}
+      ]
+    }
+  ]
+}
