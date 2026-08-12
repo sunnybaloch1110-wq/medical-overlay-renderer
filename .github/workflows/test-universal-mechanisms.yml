@@ -1,0 +1,81 @@
+name: Test universal mechanisms
+
+on:
+  push:
+    branches:
+      - test/universal-mechanisms-validation
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Render exactly three universal scenes
+        run: npm run render:batch -- manifests/test-universal-mechanisms.json
+
+      - name: Verify three outputs and metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          VIDEO_ID="universal-mechanisms-test"
+          OUTPUT_DIR="out/scenes/${VIDEO_ID}"
+          MANIFEST="out/batch-manifest.json"
+
+          test -f "$MANIFEST"
+          test -f "$OUTPUT_DIR/scene_001.mp4"
+          test -f "$OUTPUT_DIR/scene_002.mp4"
+          test -f "$OUTPUT_DIR/scene_003.mp4"
+
+          node - <<'NODE'
+          const fs = require('fs');
+          const manifest = JSON.parse(fs.readFileSync('out/batch-manifest.json', 'utf8'));
+          if (manifest.videoId !== 'universal-mechanisms-test') throw new Error('Unexpected videoId');
+          if (!Array.isArray(manifest.scenes) || manifest.scenes.length !== 3) throw new Error('Expected exactly 3 rendered scene records');
+          for (const scene of manifest.scenes) {
+            if (scene.status !== 'rendered') throw new Error(`Scene ${scene.sceneId} status is ${scene.status}`);
+          }
+          NODE
+
+          expected=(scene_001.mp4 scene_002.mp4 scene_003.mp4)
+          for file in "${expected[@]}"; do
+            path="$OUTPUT_DIR/$file"
+            size=$(stat -c '%s' "$path")
+            test "$size" -gt 0
+            echo "FILE=$path"
+            echo "SIZE_BYTES=$size"
+            ffprobe -v error \
+              -select_streams v:0 \
+              -show_entries stream=width,height,r_frame_rate,avg_frame_rate,nb_frames,codec_name \
+              -show_entries format=duration \
+              -of default=noprint_wrappers=1 \
+              "$path"
+          done
+
+      - name: Upload universal validation outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: universal-mechanisms-validation
+          path: |
+            manifests/test-universal-mechanisms.json
+            out/scenes/universal-mechanisms-test/*.mp4
+            out/batch-manifest.json
+          if-no-files-found: error
