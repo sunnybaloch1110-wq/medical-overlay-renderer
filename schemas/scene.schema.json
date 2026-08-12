@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/medical-overlay-renderer/scene.schema.json",
+  "title": "Universal Visual Scene",
+  "type": "object",
+  "required": ["schemaVersion", "id", "sourceConcept", "durationSeconds", "objects"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "id": { "type": "string", "minLength": 1, "pattern": "^[A-Za-z0-9._-]+$" },
+    "sourceConcept": { "type": "string", "minLength": 1 },
+    "durationSeconds": { "type": "number", "exclusiveMinimum": 0 },
+    "fps": { "type": "number", "exclusiveMinimum": 0 },
+    "background": { "type": "string" },
+    "title": { "type": "string" },
+    "objects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "shape", "x", "y"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "shape": { "enum": ["rect", "circle", "ellipse", "line", "text"] },
+          "x": { "type": "number" },
+          "y": { "type": "number" },
+          "width": { "type": "number" },
+          "height": { "type": "number" },
+          "radius": { "type": "number" },
+          "text": { "type": "string" },
+          "layer": { "type": "number" },
+          "state": { "type": "string" },
+          "quantity": { "type": "number" },
+          "style": { "type": "object", "additionalProperties": true },
+          "motion": {
+            "type": "object",
+            "required": ["from", "to", "durationSeconds"],
+            "properties": {
+              "from": { "$ref": "#/$defs/point" },
+              "to": { "$ref": "#/$defs/point" },
+              "startSeconds": { "type": "number", "minimum": 0 },
+              "durationSeconds": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "relationships": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "from", "to"],
+        "properties": {
+          "id": { "type": "string" },
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "label": { "type": "string" },
+          "direction": { "enum": ["forward", "backward", "bidirectional"] },
+          "style": { "type": "object", "additionalProperties": true }
+        },
+        "additionalProperties": true
+      }
+    },
+    "mechanisms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "enum": ["movement", "flow", "highlight", "measurement", "comparison", "sequence", "progression", "transformation", "before-after", "cause-effect", "interaction", "layers"] },
+          "targetIds": { "type": "array", "items": { "type": "string" } },
+          "relationshipIds": { "type": "array", "items": { "type": "string" } },
+          "config": { "type": "object", "additionalProperties": true }
+        },
+        "additionalProperties": true
+      }
+    },
+    "labels": { "type": "array" },
+    "metadata": { "type": "object", "additionalProperties": true }
+  },
+  "$defs": {
+    "point": {
+      "type": "object",
+      "required": ["x", "y"],
+      "properties": { "x": { "type": "number" }, "y": { "type": "number" } },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}
