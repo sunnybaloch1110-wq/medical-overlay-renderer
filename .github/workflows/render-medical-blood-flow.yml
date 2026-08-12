@@ -1,0 +1,53 @@
+name: Render medical blood flow
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Render MedicalBloodFlow
+        run: npm run render
+
+      - name: Verify render and inspect metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUTPUT="out/medical-blood-flow.mp4"
+          if [[ ! -f "$OUTPUT" ]]; then
+            echo "ERROR: Expected render output was not created: $OUTPUT" >&2
+            exit 1
+          fi
+
+          echo "Render output: $OUTPUT"
+          echo "File size: $(stat -c '%s bytes' "$OUTPUT")"
+          echo "FFprobe metadata:"
+          ffprobe -v error \
+            -select_streams v:0 \
+            -show_entries stream=width,height,r_frame_rate,avg_frame_rate,nb_frames,codec_name \
+            -show_entries format=duration \
+            -of default=noprint_wrappers=1 \
+            "$OUTPUT"
+
+      - name: Upload MP4 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: medical-blood-flow-mp4
+          path: out/medical-blood-flow.mp4
+          if-no-files-found: error
