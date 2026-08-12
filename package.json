@@ -1,0 +1,24 @@
+{
+  "name": "medical-overlay-renderer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Remotion-based medical visualization overlay proof of concept.",
+  "scripts": {
+    "start": "remotion studio src/index.ts",
+    "preview": "remotion preview src/index.ts",
+    "render": "remotion render src/index.ts MedicalBloodFlow out/medical-blood-flow.mp4",
+    "render:png": "remotion still src/index.ts MedicalBloodFlow out/medical-blood-flow.png"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.0",
+    "@remotion/player": "4.0.0",
+    "@types/react": "19.0.0",
+    "@types/react-dom": "19.0.0",
+    "remotion": "4.0.0",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
+  "devDependencies": {
+    "typescript": "5.8.3"
+  }
+}
