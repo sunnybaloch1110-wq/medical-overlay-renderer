@@ -15,7 +15,7 @@
         {"id":"node_b","shape":"circle","x":520,"y":300,"radius":30,"style":{"fill":"#294f63","stroke":"#72d6ff","strokeWidth":3}},
         {"id":"node_c","shape":"circle","x":820,"y":470,"radius":28,"style":{"fill":"#294f63","stroke":"#72d6ff","strokeWidth":3}},
         {"id":"node_d","shape":"circle","x":1120,"y":320,"radius":32,"style":{"fill":"#294f63","stroke":"#72d6ff","strokeWidth":3}},
-        {"id":"node_e","shape":"circle","x":1460,"y":520,"radius":34,"style":{"fill":"#294f63","stroke":"#72d6ff","strokeWidth":3}},
+        {"id":"node_e","shape":"circle","x":1460,"y":520,"radius":34,"motion":{"from":{"x":1360,"y":560},"to":{"x":1460,"y":520},"durationSeconds":3.5},"style":{"fill":"#294f63","stroke":"#72d6ff","strokeWidth":3}},
         {"id":"node_f","shape":"text","x":176,"y":590,"text":"Start","style":{"color":"#b9d1db","fontSize":22}},
         {"id":"node_g","shape":"text","x":1400,"y":620,"text":"Destination","style":{"color":"#b9d1db","fontSize":22}}
       ],
@@ -42,7 +42,7 @@
         {"id":"measure_a","shape":"line","x":530,"y":720,"width":420,"height":0,"style":{"stroke":"#89d6ff","strokeWidth":2}}
       ],
       "mechanisms": [
-        {"id":"m_compare","type":"comparison","targetIds":["item_left","item_mid"],"config":{"valueMode":"object","anchor":"bottom","gap":36,"barWidth":72,"maxBarExtent":180,"leftLabel":"A","rightLabel":"B","leftColor":"#5c8cff","rightColor":"#ff9b62","labelSuffix":" units"}},
+        {"id":"m_compare","type":"comparison","targetIds":["item_left","item_mid"],"config":{"valueMode":"quantity","anchor":"bottom","gap":36,"barWidth":72,"maxBarExtent":180,"leftLabel":"A","rightLabel":"B","leftColor":"#5c8cff","rightColor":"#ff9b62","labelSuffix":" units"}},
         {"id":"m_measure","type":"measurement","targetIds":["item_mid","item_right"],"config":{"label":"relative span","color":"#76d6a2"}}
       ]
     },
