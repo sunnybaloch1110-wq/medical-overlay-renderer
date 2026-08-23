@@ -13,14 +13,14 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "start", "end", "concept", "renderer"],
+        "required": ["id", "start", "end", "concept", "visual_type"],
         "properties": {
           "id": {"type": "string", "pattern": "^V[0-9]{3,}$"},
           "start": {"type": "number", "minimum": 0},
           "end": {"type": "number", "exclusiveMinimum": 0},
           "concept": {"type": "string", "minLength": 1},
           "transcript": {"type": "string"},
-          "renderer": {"type": "string", "minLength": 1},
+          "visual_type": {"type": "string", "minLength": 1},
           "props": {"type": "object"}
         }
       }
