@@ -1,13 +1,14 @@
 {
   "name": "medical-overlay-renderer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "Remotion-based medical visualization overlay proof of concept.",
+  "description": "Remotion renderer for external, timestamped medical visual specifications.",
   "scripts": {
     "start": "remotion studio src/index.ts",
     "preview": "remotion preview src/index.ts",
-    "render": "remotion render src/index.ts MedicalBloodFlow out/medical-blood-flow.mp4",
-    "render:png": "remotion still src/index.ts MedicalBloodFlow out/medical-blood-flow.png"
+    "render:spec": "python orchestrator/render.py",
+    "render:spec:dry": "python orchestrator/render.py --dry-run",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@remotion/cli": "4.0.502",
