@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "visual-spec.schema.json",
+  "title": "Medical Overlay Visual Specification",
+  "type": "object",
+  "required": ["video_id", "fps", "width", "height", "overlays"],
+  "properties": {
+    "video_id": {"type": "string", "minLength": 1},
+    "fps": {"type": "number", "exclusiveMinimum": 0},
+    "width": {"type": "integer", "minimum": 1},
+    "height": {"type": "integer", "minimum": 1},
+    "overlays": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "start", "end", "concept", "renderer"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^V[0-9]{3,}$"},
+          "start": {"type": "number", "minimum": 0},
+          "end": {"type": "number", "exclusiveMinimum": 0},
+          "concept": {"type": "string", "minLength": 1},
+          "transcript": {"type": "string"},
+          "renderer": {"type": "string", "minLength": 1},
+          "props": {"type": "object"}
+        }
+      }
+    }
+  }
+}
