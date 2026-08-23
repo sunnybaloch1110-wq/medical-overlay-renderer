@@ -1,9 +1,7 @@
-export const VIDEO = {
+export const VIDEO_DEFAULTS = {
   width: 1920,
   height: 1080,
   fps: 30,
-  durationInSeconds: 8,
-  durationInFrames: 240,
 } as const;
 
 export const COLORS = {
