@@ -7,25 +7,28 @@
     {
       "id": "V001",
       "start": 0.0,
-      "end": 8.0,
-      "concept": "blood flow through an artery",
-      "transcript": "Sample narration for the blood-flow explanation.",
-      "visual_type": "blood_flow",
-      "props": {
-        "title": "Blood flow through an artery",
-        "subtitle": "Particles show the direction of flow"
-      }
-    },
-    {
-      "id": "V002",
-      "start": 8.0,
-      "end": 15.5,
-      "concept": "blood flow continuation",
-      "transcript": "Second sample segment.",
-      "visual_type": "blood_flow",
-      "props": {
-        "title": "Blood flow continuation",
-        "subtitle": "The visual remains synchronized with narration"
+      "end": 4.0,
+      "concept": "example scene",
+      "transcript": "Example narration segment.",
+      "scene": {
+        "background": "transparent",
+        "elements": [
+          {
+            "type": "text",
+            "x": 960,
+            "y": 540,
+            "text": "Example",
+            "fill": "#ffffff",
+            "fontSize": 72,
+            "anchor": "middle",
+            "animation": {
+              "from": {"opacity": 0, "scale": 0.9},
+              "to": {"opacity": 1, "scale": 1},
+              "start": 0,
+              "end": 0.6
+            }
+          }
+        ]
       }
     }
   ]
