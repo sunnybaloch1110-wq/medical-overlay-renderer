@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Resumable local render queue for timestamped Remotion overlays."""
+"""Resumable renderer for external, timestamped Remotion visual specifications."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from pathlib import Path
 FPS_DEFAULT = 30
 WIDTH_DEFAULT = 1920
 HEIGHT_DEFAULT = 1080
-COMPOSITION = "MedicalBloodFlow"
+COMPOSITION = "MedicalOverlay"
 SAFE_NAME = re.compile(r"[^a-zA-Z0-9._-]+")
 
 
@@ -42,20 +42,22 @@ def slug(text: str) -> str:
 
 def validate(spec: dict) -> list[str]:
     errors: list[str] = []
-    overlays = spec["overlays"]
     previous_end = None
     seen_ids: set[str] = set()
 
-    for index, item in enumerate(overlays, 1):
+    for index, item in enumerate(spec["overlays"], 1):
         oid = item.get("id")
         start = item.get("start")
         end = item.get("end")
+        visual_type = item.get("visual_type") or item.get("renderer")
+
         if not isinstance(oid, str) or not oid:
             errors.append(f"overlay {index}: missing id")
         elif oid in seen_ids:
             errors.append(f"{oid}: duplicate id")
         else:
             seen_ids.add(oid)
+
         if not isinstance(start, (int, float)) or not isinstance(end, (int, float)):
             errors.append(f"{oid or index}: start/end must be numbers")
             continue
@@ -63,14 +65,15 @@ def validate(spec: dict) -> list[str]:
             errors.append(f"{oid}: start is negative")
         if end <= start:
             errors.append(f"{oid}: end must be greater than start")
-        if previous_end is not None:
-            if start < previous_end - 1e-6:
-                errors.append(f"{oid}: overlaps previous overlay at {start:.3f}s")
+        if previous_end is not None and start < previous_end - 1e-6:
+            errors.append(f"{oid}: overlaps previous overlay at {start:.3f}s")
         previous_end = end
+
         if not isinstance(item.get("concept"), str) or not item["concept"].strip():
             errors.append(f"{oid}: missing concept")
-        if not isinstance(item.get("renderer"), str) or not item["renderer"].strip():
-            errors.append(f"{oid}: missing renderer")
+        if not isinstance(visual_type, str) or not visual_type.strip():
+            errors.append(f"{oid}: missing visual_type")
+
     return errors
 
 
@@ -113,6 +116,7 @@ def main() -> int:
         end = float(item["end"])
         duration = end - start
         concept = slug(item["concept"])
+        visual_type = item.get("visual_type") or item.get("renderer")
         filename = f"{oid}__{timestamp(start)}-{timestamp(end)}__{concept}.mp4"
         output = overlays_dir / filename
         props_path = props_dir / f"{oid}.json"
@@ -121,7 +125,8 @@ def main() -> int:
             "id": oid,
             "concept": item["concept"],
             "transcript": item.get("transcript", ""),
-            "renderer": item["renderer"],
+            "visualType": visual_type,
+            "renderer": visual_type,
             "props": item.get("props", {}),
         }
         props_path.write_text(json.dumps(props, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -133,7 +138,7 @@ def main() -> int:
             "duration": duration,
             "concept": item["concept"],
             "transcript": item.get("transcript", ""),
-            "renderer": item["renderer"],
+            "visual_type": visual_type,
             "file": str(output.relative_to(project_dir)),
             "status": "pending",
         }
@@ -148,17 +153,12 @@ def main() -> int:
             manifest.append(record)
             continue
 
-        if item["renderer"] != "BloodFlowOverlay":
-            record["status"] = "blocked"
-            record["error"] = f"Renderer '{item['renderer']}' is not registered yet."
-            manifest.append(record)
-            continue
-
         command = [
             "npx", "remotion", "render", "src/index.ts", COMPOSITION,
-            str(output), "--props", str(props_path), "--concurrency", str(max(1, args.concurrency)),
+            str(output), "--props", str(props_path),
+            "--concurrency", str(max(1, args.concurrency)),
         ]
-        print(f"[{oid}] {start:.3f}s → {end:.3f}s | {duration:.3f}s | {concept}")
+        print(f"[{oid}] {start:.3f}s → {end:.3f}s | {duration:.3f}s | {visual_type} | {concept}")
         state[oid] = {"status": "rendering", "output": str(output), "started_at": time.time()}
         state_path.write_text(json.dumps(state, indent=2), encoding="utf-8")
 
@@ -189,9 +189,8 @@ def main() -> int:
 
     completed = sum(x["status"] == "completed" for x in manifest)
     failed = sum(x["status"] == "failed" for x in manifest)
-    blocked = sum(x["status"] == "blocked" for x in manifest)
-    print(f"DONE: {completed} completed, {failed} failed, {blocked} blocked")
-    return 1 if failed or blocked else 0
+    print(f"DONE: {completed} completed, {failed} failed")
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":
