@@ -20,12 +20,7 @@
             "y": 540,
             "r": 70,
             "fill": "#e85d75",
-            "animation": {
-              "from": {"x": 180, "opacity": 0},
-              "to": {"x": 420, "opacity": 1},
-              "start": 0,
-              "end": 1.2
-            }
+            "animation": {"from": {"x": 180, "opacity": 0}, "to": {"x": 420, "opacity": 1}, "start": 0, "end": 1.2}
           },
           {
             "id": "right",
@@ -34,12 +29,7 @@
             "y": 540,
             "r": 70,
             "fill": "#4ea5d9",
-            "animation": {
-              "from": {"x": 1740, "opacity": 0},
-              "to": {"x": 1500, "opacity": 1},
-              "start": 0,
-              "end": 1.2
-            }
+            "animation": {"from": {"x": 1740, "opacity": 0}, "to": {"x": 1500, "opacity": 1}, "start": 0, "end": 1.2}
           },
           {
             "id": "center",
@@ -49,12 +39,7 @@
             "width": 140,
             "height": 140,
             "fill": "#f4c95d",
-            "animation": {
-              "from": {"scale": 0.2, "rotation": -45, "opacity": 0},
-              "to": {"scale": 1, "rotation": 0, "opacity": 1},
-              "start": 0.5,
-              "end": 1.8
-            }
+            "animation": {"from": {"scale": 0.2, "rotation": -45, "opacity": 0}, "to": {"scale": 1, "rotation": 0, "opacity": 1}, "start": 0.5, "end": 1.8}
           },
           {
             "id": "label",
@@ -65,12 +50,7 @@
             "fill": "#ffffff",
             "fontSize": 42,
             "anchor": "middle",
-            "animation": {
-              "from": {"opacity": 0, "y": 860},
-              "to": {"opacity": 1, "y": 820},
-              "start": 1.2,
-              "end": 2.2
-            }
+            "animation": {"from": {"opacity": 0, "y": 860}, "to": {"opacity": 1, "y": 820}, "start": 1.2, "end": 2.2}
           }
         ]
       }
@@ -93,12 +73,7 @@
             "y2": 0,
             "stroke": "#7bdff2",
             "strokeWidth": 18,
-            "animation": {
-              "from": {"scale": 0},
-              "to": {"scale": 1},
-              "start": 0,
-              "end": 1
-            }
+            "animation": {"from": {"scale": 0}, "to": {"scale": 1}, "start": 0, "end": 1}
           },
           {
             "id": "path",
@@ -109,12 +84,7 @@
             "fill": "none",
             "stroke": "#9b5de5",
             "strokeWidth": 14,
-            "animation": {
-              "from": {"opacity": 0, "scale": 0.4},
-              "to": {"opacity": 1, "scale": 1},
-              "start": 0.6,
-              "end": 2.2
-            }
+            "animation": {"from": {"opacity": 0, "scale": 0.4}, "to": {"opacity": 1, "scale": 1}, "start": 0.6, "end": 2.2}
           }
         ]
       }
