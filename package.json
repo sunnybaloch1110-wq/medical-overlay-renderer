@@ -3,23 +3,7 @@
   "version": "0.2.0",
   "private": true,
   "description": "Remotion renderer for external, timestamped medical visual specifications.",
-  "scripts": {
-    "start": "remotion studio src/index.ts",
-    "preview": "remotion preview src/index.ts",
-    "render:spec": "python orchestrator/render.py",
-    "render:spec:dry": "python orchestrator/render.py --dry-run",
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@remotion/cli": "4.0.502",
-    "@remotion/player": "4.0.502",
-    "@types/react": "19.0.0",
-    "@types/react-dom": "19.0.0",
-    "remotion": "4.0.502",
-    "react": "19.0.0",
-    "react-dom": "19.0.0"
-  },
-  "devDependencies": {
-    "typescript": "5.8.3"
-  }
+  "scripts": {"start":"remotion studio src/index.ts","preview":"remotion preview src/index.ts","render:spec":"python orchestrator/render.py","render:spec:dry":"python orchestrator/render.py --dry-run","typecheck":"tsc --noEmit"},
+  "dependencies": {"@remotion/cli":"4.0.502","@remotion/player":"4.0.502","@types/react":"19.0.0","@types/react-dom":"19.0.0","remotion":"4.0.502","react":"19.0.0","react-dom":"19.0.0"},
+  "devDependencies": {"typescript":"5.8.3"}
 }
