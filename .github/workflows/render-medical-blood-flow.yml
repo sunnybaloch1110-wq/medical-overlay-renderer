@@ -1,7 +1,16 @@
-name: Render medical blood flow
+name: Render visual specification
 
 on:
   workflow_dispatch:
+    inputs:
+      visual_spec:
+        description: Path to the Visual Spec JSON
+        required: true
+        default: examples/visual-spec.sample.json
+      concurrency:
+        description: Remotion render concurrency
+        required: false
+        default: "2"
 
 permissions:
   contents: read
@@ -13,46 +22,29 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js LTS
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
 
-      - name: Install dependencies
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Node dependencies
         run: npm ci
 
-      - name: Render MedicalBloodFlow
-        run: npm run render
+      - name: Typecheck renderer
+        run: npm run typecheck
 
-      - name: Install FFmpeg
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
+      - name: Render supplied Visual Spec
+        run: python orchestrator/render.py "${{ inputs.visual_spec }}" --project-dir workflow-output --concurrency "${{ inputs.concurrency }}"
 
-      - name: Verify render and inspect metadata
-        shell: bash
-        run: |
-          set -euo pipefail
-          OUTPUT="out/medical-blood-flow.mp4"
-          if [[ ! -f "$OUTPUT" ]]; then
-            echo "ERROR: Expected render output was not created: $OUTPUT" >&2
-            exit 1
-          fi
-
-          echo "Render output: $OUTPUT"
-          echo "File size: $(stat -c '%s bytes' "$OUTPUT")"
-          echo "FFprobe metadata:"
-          ffprobe -v error \
-            -select_streams v:0 \
-            -show_entries stream=width,height,r_frame_rate,avg_frame_rate,nb_frames,codec_name \
-            -show_entries format=duration \
-            -of default=noprint_wrappers=1 \
-            "$OUTPUT"
-
-      - name: Upload MP4 artifact
+      - name: Upload rendered overlays and manifest
         uses: actions/upload-artifact@v4
         with:
-          name: medical-blood-flow-mp4
-          path: out/medical-blood-flow.mp4
+          name: visual-spec-render
+          path: workflow-output/
           if-no-files-found: error
