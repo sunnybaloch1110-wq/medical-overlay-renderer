@@ -1,6 +1,6 @@
 import React from 'react';
 import { BloodFlowOverlay } from '../components/BloodFlowOverlay';
-import type { OverlayRenderProps } from '../OverlayRoot';
+import type { OverlayRenderProps } from '../types';
 
 export type RendererComponent = React.ComponentType<OverlayRenderProps>;
 
