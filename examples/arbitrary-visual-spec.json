@@ -1,0 +1,123 @@
+{
+  "video_id": "arbitrary-engine-test",
+  "fps": 30,
+  "width": 1920,
+  "height": 1080,
+  "overlays": [
+    {
+      "id": "V001",
+      "start": 0,
+      "end": 3.5,
+      "concept": "three objects converge",
+      "transcript": "Arbitrary renderer test.",
+      "scene": {
+        "background": "transparent",
+        "elements": [
+          {
+            "id": "left",
+            "type": "circle",
+            "x": 420,
+            "y": 540,
+            "r": 70,
+            "fill": "#e85d75",
+            "animation": {
+              "from": {"x": 180, "opacity": 0},
+              "to": {"x": 420, "opacity": 1},
+              "start": 0,
+              "end": 1.2
+            }
+          },
+          {
+            "id": "right",
+            "type": "circle",
+            "x": 1500,
+            "y": 540,
+            "r": 70,
+            "fill": "#4ea5d9",
+            "animation": {
+              "from": {"x": 1740, "opacity": 0},
+              "to": {"x": 1500, "opacity": 1},
+              "start": 0,
+              "end": 1.2
+            }
+          },
+          {
+            "id": "center",
+            "type": "rect",
+            "x": 960,
+            "y": 540,
+            "width": 140,
+            "height": 140,
+            "fill": "#f4c95d",
+            "animation": {
+              "from": {"scale": 0.2, "rotation": -45, "opacity": 0},
+              "to": {"scale": 1, "rotation": 0, "opacity": 1},
+              "start": 0.5,
+              "end": 1.8
+            }
+          },
+          {
+            "id": "label",
+            "type": "text",
+            "x": 960,
+            "y": 820,
+            "text": "GENERIC RENDERER",
+            "fill": "#ffffff",
+            "fontSize": 42,
+            "anchor": "middle",
+            "animation": {
+              "from": {"opacity": 0, "y": 860},
+              "to": {"opacity": 1, "y": 820},
+              "start": 1.2,
+              "end": 2.2
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "V002",
+      "start": 3.5,
+      "end": 7.75,
+      "concept": "independent second scene",
+      "transcript": "A completely different scene uses the same engine.",
+      "scene": {
+        "background": "transparent",
+        "elements": [
+          {
+            "id": "line",
+            "type": "line",
+            "x": 480,
+            "y": 540,
+            "x2": 960,
+            "y2": 0,
+            "stroke": "#7bdff2",
+            "strokeWidth": 18,
+            "animation": {
+              "from": {"scale": 0},
+              "to": {"scale": 1},
+              "start": 0,
+              "end": 1
+            }
+          },
+          {
+            "id": "path",
+            "type": "path",
+            "x": 960,
+            "y": 540,
+            "d": "M 0 0 C 160 -220 320 220 480 0",
+            "fill": "none",
+            "stroke": "#9b5de5",
+            "strokeWidth": 14,
+            "animation": {
+              "from": {"opacity": 0, "scale": 0.4},
+              "to": {"opacity": 1, "scale": 1},
+              "start": 0.6,
+              "end": 2.2
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
