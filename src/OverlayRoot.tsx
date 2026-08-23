@@ -12,7 +12,10 @@ export const OverlayRoot: React.FC = () => (
     fps={VIDEO_DEFAULTS.fps}
     width={VIDEO_DEFAULTS.width}
     height={VIDEO_DEFAULTS.height}
-    defaultProps={{ durationInSeconds: 1, visualType: 'blood_flow' }}
+    defaultProps={{
+      durationInSeconds: 1,
+      scene: { elements: [] },
+    }}
     calculateMetadata={({ props }) => ({
       durationInFrames: Math.max(1, Math.round(props.durationInSeconds * VIDEO_DEFAULTS.fps)),
       fps: VIDEO_DEFAULTS.fps,
