@@ -1,0 +1,26 @@
+{
+  "video_id": "medical-video-001",
+  "fps": 30,
+  "width": 1920,
+  "height": 1080,
+  "overlays": [
+    {
+      "id": "V001",
+      "start": 0.0,
+      "end": 8.0,
+      "concept": "blood flow through an artery",
+      "transcript": "Sample narration for the blood-flow explanation.",
+      "renderer": "BloodFlowOverlay",
+      "props": {}
+    },
+    {
+      "id": "V002",
+      "start": 8.0,
+      "end": 15.5,
+      "concept": "blood flow continuation",
+      "transcript": "Second sample segment.",
+      "renderer": "BloodFlowOverlay",
+      "props": {}
+    }
+  ]
+}
