@@ -1,5 +1,5 @@
 {
-  "video_id": "medical-video-001",
+  "video_id": "example-project",
   "fps": 30,
   "width": 1920,
   "height": 1080,
@@ -10,8 +10,11 @@
       "end": 8.0,
       "concept": "blood flow through an artery",
       "transcript": "Sample narration for the blood-flow explanation.",
-      "renderer": "BloodFlowOverlay",
-      "props": {}
+      "visual_type": "blood_flow",
+      "props": {
+        "title": "Blood flow through an artery",
+        "subtitle": "Particles show the direction of flow"
+      }
     },
     {
       "id": "V002",
@@ -19,8 +22,11 @@
       "end": 15.5,
       "concept": "blood flow continuation",
       "transcript": "Second sample segment.",
-      "renderer": "BloodFlowOverlay",
-      "props": {}
+      "visual_type": "blood_flow",
+      "props": {
+        "title": "Blood flow continuation",
+        "subtitle": "The visual remains synchronized with narration"
+      }
     }
   ]
 }
